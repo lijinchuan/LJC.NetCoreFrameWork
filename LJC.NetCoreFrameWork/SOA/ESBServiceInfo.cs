@@ -1,0 +1,55 @@
+﻿using LJC.NetCoreFrameWork.SocketApplication;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace LJC.NetCoreFrameWork.SOA
+{
+    public class ESBServiceInfo
+    {
+        public int ClientID
+        {
+            get;
+            set;
+        }
+
+        public int ServiceNo
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 会话信息
+        /// </summary>
+        public Session Session
+        {
+            get;
+            set;
+        }
+
+        public string[] RedirectTcpIps
+        {
+            get;
+            set;
+        }
+
+        public int RedirectTcpPort
+        {
+            get;
+            set;
+        }
+
+        public string[] RedirectUdpIps
+        {
+            get;
+            set;
+        }
+
+        public int RedirectUdpPort
+        {
+            get;
+            set;
+        }
+    }
+}

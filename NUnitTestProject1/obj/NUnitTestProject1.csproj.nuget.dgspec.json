@@ -1,0 +1,191 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\Git\\LJC.NetCoreFrameWork\\NUnitTestProject1\\NUnitTestProject1.csproj": {}
+  },
+  "projects": {
+    "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork.Net\\LJC.NetCoreFrameWork.Net.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork.Net\\LJC.NetCoreFrameWork.Net.csproj",
+        "projectName": "LJC.NetCoreFrameWork.Net",
+        "projectPath": "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork.Net\\LJC.NetCoreFrameWork.Net.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork.Net\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "dependencies": {
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    },
+    "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork.csproj",
+        "projectName": "LJC.NetCoreFrameWork",
+        "projectPath": "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp2.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp2.0": {
+            "projectReferences": {
+              "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork.Net\\LJC.NetCoreFrameWork.Net.csproj": {
+                "projectPath": "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork.Net\\LJC.NetCoreFrameWork.Net.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp2.0": {
+          "dependencies": {
+            "Microsoft.NETCore.App": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.0, )",
+              "autoReferenced": true
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.2, )"
+            },
+            "System.Configuration.ConfigurationManager": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    },
+    "D:\\Git\\LJC.NetCoreFrameWork\\NUnitTestProject1\\NUnitTestProject1.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Git\\LJC.NetCoreFrameWork\\NUnitTestProject1\\NUnitTestProject1.csproj",
+        "projectName": "NUnitTestProject1",
+        "projectPath": "D:\\Git\\LJC.NetCoreFrameWork\\NUnitTestProject1\\NUnitTestProject1.csproj",
+        "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+        "outputPath": "D:\\Git\\LJC.NetCoreFrameWork\\NUnitTestProject1\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp2.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp2.1": {
+            "projectReferences": {
+              "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork.csproj": {
+                "projectPath": "D:\\Git\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork\\LJC.NetCoreFrameWork.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp2.1": {
+          "dependencies": {
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[15.8.0, )"
+            },
+            "Microsoft.NETCore.App": {
+              "target": "Package",
+              "version": "[2.1.0, )",
+              "autoReferenced": true
+            },
+            "NUnit3TestAdapter": {
+              "target": "Package",
+              "version": "[3.10.0, )"
+            },
+            "nunit": {
+              "target": "Package",
+              "version": "[3.10.1, )"
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    }
+  }
+}
