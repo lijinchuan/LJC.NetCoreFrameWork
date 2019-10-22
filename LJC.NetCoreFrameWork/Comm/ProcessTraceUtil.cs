@@ -10,12 +10,36 @@ namespace LJC.NetCoreFrameWork.Comm
     public class ProcessTraceUtil
     {
         private static ConcurrentDictionary<int, Queue<Tuple<string, long>>> TraceDic = new ConcurrentDictionary<int, Queue<Tuple<string, long>>>();
+        private static int _maxTraceId = 1;
+        private const string _traceIDKey = "__pt_traceid";
+
+        private static int GetTraceID()
+        {
+            var obj = TraceContext.GetData(_traceIDKey);
+            if (obj == null)
+            {
+                return 0;
+            }
+
+            return (int)obj;
+        }
+
+        private static int CreateTraceID()
+        {
+            var traceid = Interlocked.Increment(ref _maxTraceId);
+            if (traceid > int.MaxValue - 10000)
+            {
+                _maxTraceId = 0;
+            }
+            TraceContext.SetData(_traceIDKey, traceid);
+            return traceid;
+        }
 
         public static void StartTrace()
         {
             try
             {
-                var traceid = Thread.CurrentThread.ManagedThreadId;
+                var traceid = CreateTraceID();
                 Queue<Tuple<string, long>> queue = null;
                 if (!TraceDic.TryGetValue(traceid, out queue))
                 {
@@ -36,7 +60,7 @@ namespace LJC.NetCoreFrameWork.Comm
         {
             try
             {
-                TraceDic[Thread.CurrentThread.ManagedThreadId].Enqueue(new Tuple<string, long>(message, Environment.TickCount & Int32.MaxValue));
+                TraceDic[GetTraceID()].Enqueue(new Tuple<string, long>(message, Environment.TickCount & Int32.MaxValue));
             }
             catch { }
         }
@@ -76,7 +100,7 @@ namespace LJC.NetCoreFrameWork.Comm
         {
             try
             {
-                var threadid = Thread.CurrentThread.ManagedThreadId;
+                var threadid = GetTraceID();
                 TraceDic[threadid].Enqueue(new Tuple<string, long>(string.Format("[mem:{1}{2}字节]{0}", message, GetMem(munit), munit), Environment.TickCount & Int32.MaxValue));
             }
             catch
@@ -89,7 +113,7 @@ namespace LJC.NetCoreFrameWork.Comm
         {
             try
             {
-                return Environment.TickCount & Int32.MaxValue - TraceDic[Thread.CurrentThread.ManagedThreadId].First().Item2;
+                return Environment.TickCount & Int32.MaxValue - TraceDic[GetTraceID()].First().Item2;
             }
             catch
             {
@@ -103,21 +127,23 @@ namespace LJC.NetCoreFrameWork.Comm
             {
                 StringBuilder sb = new StringBuilder();
 
-                var traceid = Thread.CurrentThread.ManagedThreadId;
-
-                var queue = TraceDic[traceid];
-
-                long timeline = 0;
-                while (queue.Count > 0)
+                var traceid = GetTraceID();
+                if (traceid > 0)
                 {
-                    var tp = queue.Dequeue();
-                    if (timeline == 0)
+                    var queue = TraceDic[traceid];
+
+                    long timeline = 0;
+                    while (queue.Count > 0)
                     {
-                        timeline = tp.Item2;
+                        var tp = queue.Dequeue();
+                        if (timeline == 0)
+                        {
+                            timeline = tp.Item2;
+                        }
+                        sb.AppendLine(string.Format("{0}ms:  {1}", tp.Item2 - timeline, tp.Item1));
                     }
-                    sb.AppendLine(string.Format("{0}ms:  {1}", tp.Item2 - timeline, tp.Item1));
+                    TraceDic.TryRemove(traceid, out queue);
                 }
-                TraceDic.TryRemove(traceid, out queue);
                 return sb.ToString();
             }
             catch
