@@ -300,7 +300,9 @@ namespace LJC.NetCoreFrameWork.Net.HTTP.Server
                     }
                 }
             }
+            #if DEBUG
             Console.WriteLine(ID + " read " + read + " bytes for event handler");
+#endif
             ReadInternal(buf, read, false);
         }
 
@@ -308,13 +310,16 @@ namespace LJC.NetCoreFrameWork.Net.HTTP.Server
         {
             byte[] ba = new byte[len];
             Array.Copy(buf, ba, len);
+            #if DEBUG
             Console.WriteLine(ByteBuilder.FormatParameter(new Parameter(ba, ParameterType.Byte)));
+#endif
         }
 
         void ReadInternal(byte[] buf, int read, bool alreadyEncrypted)
         {
-
+#if DEBUG
             Console.WriteLine(ID + " read " + read + " bytes for event handler");
+#endif
             if ((!alreadyEncrypted) && (encType != EncryptionType.None))
             {
                 if (encComplete)

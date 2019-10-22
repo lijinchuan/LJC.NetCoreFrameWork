@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <Configurations>Debug;Release;win64-realse</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

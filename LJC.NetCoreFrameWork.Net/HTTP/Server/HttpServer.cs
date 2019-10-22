@@ -48,7 +48,9 @@ namespace LJC.NetCoreFrameWork.Net.HTTP.Server
             ClientData data = (ClientData)ci.Data;
             if (data.state != ClientState.Header) return; // already done; must be some text in content, which will be handled elsewhere
             text = text.Substring(data.headerskip);
+            #if DEBUG
             Console.WriteLine("Read header: " + text + " (skipping first " + data.headerskip + ")");
+#endif
             data.headerskip = 0;
             string[] lines = text.Replace("\r\n", "\n").Split('\n');
             data.req.HeaderText = text;
@@ -142,7 +144,9 @@ namespace LJC.NetCoreFrameWork.Net.HTTP.Server
             CleanUpSessions();
             int ofs = 0;
             ClientData data = (ClientData)ci.Data;
+            #if DEBUG
             Console.WriteLine("Reading " + len + " bytes of content, in state " + data.state + ", skipping " + data.skip + ", read " + data.read);
+#endif
             switch (data.state)
             {
                 case ClientState.Content: break;
@@ -252,7 +256,9 @@ namespace LJC.NetCoreFrameWork.Net.HTTP.Server
                 if (time > sessionTimeout)
                 {
                     toRemove.Add(k);
+#if DEBUG
                     Console.WriteLine("Removed session " + k);
+#endif
                 }
             }
             foreach (object k in toRemove) sessions.Remove(k);
