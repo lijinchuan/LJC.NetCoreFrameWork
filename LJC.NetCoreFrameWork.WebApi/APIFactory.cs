@@ -14,7 +14,7 @@ namespace LJC.NetCoreFrameWork.WebApi
     {
         internal static ConcurrentDictionary<string, APIHandler> apiFunMapper = new ConcurrentDictionary<string, APIHandler>();
         internal static ConcurrentDictionary<string, bool> apiPermission = new ConcurrentDictionary<string, bool>();
-
+        internal static ConcurrentDictionary<string, List<APIHandler>> apigplist = new ConcurrentDictionary<string, List<APIHandler>>();
         static APIFactory()
         {
             //配置
@@ -43,8 +43,29 @@ namespace LJC.NetCoreFrameWork.WebApi
             try
             {
                 var methed = url.Substring(url.LastIndexOf('/') + 1).ToLower();
-                
-                if ("json".Equals(methed))
+
+                if ("invoke".Equals(methed))
+                {
+                    var urlnodes = url.Split('/');
+
+                    APIHandler fun;
+                    methed = urlnodes[urlnodes.Length - 2].ToLower();
+                    if (apiFunMapper.TryGetValue(methed, out fun))
+                    {
+                        if (!fun.ApiMethodProp.IsVisible)
+                        {
+                            throw new NotSupportedException();
+                        }
+                        var jsonfun = new APIInvokeHandler(methed, fun);
+                        jsonfun._ipLimit = ConfigHelper.AppConfig(fun.ApiMethodProp.IpLimitConfig);
+                        return jsonfun;
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(string.Format("找不到api方法:{0}", methed));
+                    }
+                }
+                else if ("json".Equals(methed))
                 {
                     var urlnodes = url.Split('/');
 
@@ -57,6 +78,48 @@ namespace LJC.NetCoreFrameWork.WebApi
                             throw new NotSupportedException();
                         }
                         var jsonfun = new APIJsonHandler(methed, fun);
+                        jsonfun._ipLimit = ConfigHelper.AppConfig(fun.ApiMethodProp.IpLimitConfig);
+                        return jsonfun;
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(string.Format("找不到api方法:{0}", methed));
+                    }
+                }
+                else if ("req".Equals(methed))
+                {
+                    var urlnodes = url.Split('/');
+
+                    APIHandler fun;
+                    methed = urlnodes[urlnodes.Length - 2].ToLower();
+                    if (apiFunMapper.TryGetValue(methed, out fun))
+                    {
+                        if (!fun.ApiMethodProp.IsVisible)
+                        {
+                            throw new NotSupportedException();
+                        }
+                        var jsonfun = new ApiGenRequestHandler(methed, fun);
+                        jsonfun._ipLimit = ConfigHelper.AppConfig(fun.ApiMethodProp.IpLimitConfig);
+                        return jsonfun;
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(string.Format("找不到api方法:{0}", methed));
+                    }
+                }
+                else if ("resp".Equals(methed))
+                {
+                    var urlnodes = url.Split('/');
+
+                    APIHandler fun;
+                    methed = urlnodes[urlnodes.Length - 2].ToLower();
+                    if (apiFunMapper.TryGetValue(methed, out fun))
+                    {
+                        if (!fun.ApiMethodProp.IsVisible)
+                        {
+                            throw new NotSupportedException();
+                        }
+                        var jsonfun = new ApiGenRespHandler(methed, fun);
                         jsonfun._ipLimit = ConfigHelper.AppConfig(fun.ApiMethodProp.IpLimitConfig);
                         return jsonfun;
                     }
@@ -134,28 +197,55 @@ namespace LJC.NetCoreFrameWork.WebApi
                             var apimethod = (APIMethodAttribute)method.GetCustomAttributes(typeof(APIMethodAttribute), true).FirstOrDefault();
                             if (apimethod != null)
                             {
+                                if (!apigplist.ContainsKey(tp.Name))
+                                {
+                                    apigplist.TryAdd(tp.Name, new List<APIHandler>());
+                                }
+
                                 string methodname = string.IsNullOrWhiteSpace(apimethod.Aliname) ? method.Name.ToLower() : apimethod.Aliname.ToLower();
+                                apimethod.MethodName = methodname;
                                 if ("json".Equals(methodname))
                                 {
                                     throw new Exception("json不能用于api方法名");
                                 }
+                                if ("req".Equals(methodname))
+                                {
+                                    throw new Exception("req不能用于api方法名");
+                                }
+                                if ("resp".Equals(methodname))
+                                {
+                                    throw new Exception("resp不能用于api方法名");
+                                }
+                                
                                 if (apiFunMapper.ContainsKey(methodname))
                                 {
                                     throw new Exception(string.Format("api方法已经被注册:{0}", methodname));
                                 }
                                 var param = method.GetParameters();
 
+                                var fun = ReflectionHelper.GetMethodAnnotation(method);
+                                if (!string.IsNullOrWhiteSpace(fun))
+                                {
+                                    apimethod.Function = fun;
+                                }
+
                                 var tpInstance = Activator.CreateInstance(tp);
                                 if (param.Length == 0)
                                 {
-                                    apiFunMapper.TryAdd(methodname, new APIEmptyHandler(method.ReturnType, apimethod, () =>
-                                    method.Invoke(tpInstance, null)));
+                                    var hander = new APIEmptyHandler(method.ReturnType, apimethod, () => method.Invoke(tpInstance, null));
+                                    if (apiFunMapper.TryAdd(methodname, hander))
+                                    {
+                                        apigplist[tp.Name].Add(hander);
+                                    }
                                 }
                                 else if (param.Length == 1)
                                 {
                                     Type t = param[0].ParameterType;
-                                    apiFunMapper.TryAdd(methodname, new APIHandler(t, method.ReturnType, apimethod, (o) =>
-                                    method.Invoke(tpInstance, new[] { o })));
+                                    var hander = new APIHandler(t, method.ReturnType, apimethod, (o) => method.Invoke(tpInstance, new[] { o }));
+                                    if (apiFunMapper.TryAdd(methodname, hander))
+                                    {
+                                        apigplist[tp.Name].Add(hander);
+                                    }
                                 }
                                 else
                                 {
