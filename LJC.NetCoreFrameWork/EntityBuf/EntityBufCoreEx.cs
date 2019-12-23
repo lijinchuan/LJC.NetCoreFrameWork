@@ -493,7 +493,7 @@ namespace LJC.NetCoreFrameWork.EntityBuf
                     }
                     else
                     {
-                        var diccount = new Random().Next(1, 3);
+                        var diccount = 1;
                         //
                         //写入长度
                         msWriter.WriteInt32(diccount);
@@ -503,7 +503,7 @@ namespace LJC.NetCoreFrameWork.EntityBuf
                             //object k=kv.Eval("Key");
                             //object v = kv.Eval("Value");
 
-                            GenSerialize(typeof(string), msWriter);
+                            GenSerialize(bufType.GenerTypes[0], msWriter);
                             GenSerialize(bufType.GenerTypes[1], msWriter);
                             i++;
                         }

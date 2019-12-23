@@ -100,6 +100,7 @@ namespace LJC.NetCoreFrameWork.EntityBuf
                     break;
                 case "Dictionary`2":
                     ebtype.EntityType = EntityType.DICTIONARY;
+                    ebtype.GenerTypes = GetDirctionaryKeyValueType(ebtype.ValueType);
                     break;
                 case "List`1":
                     ebtype.EntityType = EntityType.LIST;
