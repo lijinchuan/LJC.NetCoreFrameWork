@@ -3,8 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <RuntimeIdentifier>centos.7-x64</RuntimeIdentifier>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <!--<RuntimeIdentifier>centos.7-x64</RuntimeIdentifier>-->
+    <!--<GeneratePackageOnBuild>true</GeneratePackageOnBuild>-->
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+    <DocumentationFile>D:\learntool\github\LJC.NetCoreFrameWork\LjcTest\LjcTest.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

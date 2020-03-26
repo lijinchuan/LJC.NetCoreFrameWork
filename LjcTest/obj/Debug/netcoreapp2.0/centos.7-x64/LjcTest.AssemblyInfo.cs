@@ -11,12 +11,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("NUnitTestProject1")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("LjcTest")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
-[assembly: System.Reflection.AssemblyProductAttribute("NUnitTestProject1")]
-[assembly: System.Reflection.AssemblyTitleAttribute("NUnitTestProject1")]
+[assembly: System.Reflection.AssemblyProductAttribute("LjcTest")]
+[assembly: System.Reflection.AssemblyTitleAttribute("LjcTest")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // 由 MSBuild WriteCodeFragment 类生成。

@@ -119,6 +119,11 @@ namespace LjcTest
             }
         }
 
+        /// <summary>
+        /// 查询用户
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [LJC.NetCoreFrameWork.WebApi.APIMethod()]
         public GetUserResponse GetUser(GetUserRequest request)
         {
@@ -128,6 +133,11 @@ namespace LjcTest
             };
         }
 
+        /// <summary>
+        /// 添加用户
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [APIMethod]
         public AddPersonResponse AddPerson(AddPersonRequest request)
         {

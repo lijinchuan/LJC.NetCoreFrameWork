@@ -16,6 +16,12 @@ namespace LJC.NetCoreFrameWork.WebApi
             set;
         }
 
+        public string MethodName
+        {
+            get;
+            set;
+        }
+
         private bool _standApiOutPut = true;
         [Obsolete("请用OutPutContentType代替。")]
         /// <summary>

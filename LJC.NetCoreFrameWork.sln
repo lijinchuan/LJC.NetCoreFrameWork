@@ -9,36 +9,47 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnitTestProject1", "NUnitT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LjcTest", "LjcTest\LjcTest.csproj", "{2F4C50D7-DCEA-4B3C-B9ED-9C548715338D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LJC.NetCoreFrameWork.Net", "LJC.NetCoreFrameWork.Net\LJC.NetCoreFrameWork.Net.csproj", "{F548016A-0B2C-44C5-BAF4-6A88AA9B5F2C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LJC.NetCoreFrameWork.Net", "LJC.NetCoreFrameWork.Net\LJC.NetCoreFrameWork.Net.csproj", "{F548016A-0B2C-44C5-BAF4-6A88AA9B5F2C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LJC.NetCoreFrameWork.WebApi", "LJC.NetCoreFrameWork.WebApi\LJC.NetCoreFrameWork.WebApi.csproj", "{594ED6ED-3DAF-4DF8-A9B4-76700BB48E3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LJC.NetCoreFrameWork.WebApi", "LJC.NetCoreFrameWork.WebApi\LJC.NetCoreFrameWork.WebApi.csproj", "{594ED6ED-3DAF-4DF8-A9B4-76700BB48E3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		win64-realse|Any CPU = win64-realse|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{29D795F2-5FEC-4C2A-AB81-97BCFCA9862A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{29D795F2-5FEC-4C2A-AB81-97BCFCA9862A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29D795F2-5FEC-4C2A-AB81-97BCFCA9862A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29D795F2-5FEC-4C2A-AB81-97BCFCA9862A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29D795F2-5FEC-4C2A-AB81-97BCFCA9862A}.win64-realse|Any CPU.ActiveCfg = win64-realse|Any CPU
+		{29D795F2-5FEC-4C2A-AB81-97BCFCA9862A}.win64-realse|Any CPU.Build.0 = win64-realse|Any CPU
 		{11102EC1-1259-447B-9B5F-79CDA67754E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{11102EC1-1259-447B-9B5F-79CDA67754E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11102EC1-1259-447B-9B5F-79CDA67754E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11102EC1-1259-447B-9B5F-79CDA67754E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11102EC1-1259-447B-9B5F-79CDA67754E3}.win64-realse|Any CPU.ActiveCfg = win64-realse|Any CPU
+		{11102EC1-1259-447B-9B5F-79CDA67754E3}.win64-realse|Any CPU.Build.0 = win64-realse|Any CPU
 		{2F4C50D7-DCEA-4B3C-B9ED-9C548715338D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2F4C50D7-DCEA-4B3C-B9ED-9C548715338D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F4C50D7-DCEA-4B3C-B9ED-9C548715338D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F4C50D7-DCEA-4B3C-B9ED-9C548715338D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F4C50D7-DCEA-4B3C-B9ED-9C548715338D}.win64-realse|Any CPU.ActiveCfg = Release|Any CPU
+		{2F4C50D7-DCEA-4B3C-B9ED-9C548715338D}.win64-realse|Any CPU.Build.0 = Release|Any CPU
 		{F548016A-0B2C-44C5-BAF4-6A88AA9B5F2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F548016A-0B2C-44C5-BAF4-6A88AA9B5F2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F548016A-0B2C-44C5-BAF4-6A88AA9B5F2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F548016A-0B2C-44C5-BAF4-6A88AA9B5F2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F548016A-0B2C-44C5-BAF4-6A88AA9B5F2C}.win64-realse|Any CPU.ActiveCfg = win64-realse|Any CPU
+		{F548016A-0B2C-44C5-BAF4-6A88AA9B5F2C}.win64-realse|Any CPU.Build.0 = win64-realse|Any CPU
 		{594ED6ED-3DAF-4DF8-A9B4-76700BB48E3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{594ED6ED-3DAF-4DF8-A9B4-76700BB48E3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{594ED6ED-3DAF-4DF8-A9B4-76700BB48E3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{594ED6ED-3DAF-4DF8-A9B4-76700BB48E3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{594ED6ED-3DAF-4DF8-A9B4-76700BB48E3A}.win64-realse|Any CPU.ActiveCfg = win64-realse|Any CPU
+		{594ED6ED-3DAF-4DF8-A9B4-76700BB48E3A}.win64-realse|Any CPU.Build.0 = win64-realse|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

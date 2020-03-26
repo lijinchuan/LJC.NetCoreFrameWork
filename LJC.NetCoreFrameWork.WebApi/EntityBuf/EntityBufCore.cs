@@ -56,7 +56,7 @@ namespace LJC.NetCoreFrameWork.WebApi.EntityBuf
             if (isArray)
             {
                 //sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>", bufType.Property == null ? string.Empty : ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo), bufType.ValueType.Name, bufType.Property == null ? string.Empty : ReflectionHelper.GetObjectDescription(bufType.Property.PropertyInfo));
-                StringBuilder insb = new StringBuilder("<table style=\"border:solid 1px yellow;\" border=\"1\">");
+                StringBuilder insb = new StringBuilder("<table cellpadding=0 cellspacing=0 border=\"0\">");
                 insb.AppendFormat("<tr><th>参数名</th><th>参数类型</th><th>备注</th></tr>");
                 GetPropToTable(bufType.ClassType, insb);
                 insb.Append("</table>");
@@ -73,7 +73,7 @@ namespace LJC.NetCoreFrameWork.WebApi.EntityBuf
                     if (tp.Item1.EntityType == EntityType.COMPLEX)
                     {
                         //这里加上属性
-                        StringBuilder insb = new StringBuilder("<table style=\"border:solid 1px yellow;\" border=\"1\">");
+                        StringBuilder insb = new StringBuilder("<table cellpadding=0 cellspacing=0 border=\"0\">");
                         insb.AppendFormat("<tr><th>参数名</th><th>参数类型</th><th>备注</th></tr>");
                         //GetPropToTable(bufType.ClassType, insb);
                         DelComplex(isTypeArray2, tp.Item1, insb);
@@ -83,11 +83,49 @@ namespace LJC.NetCoreFrameWork.WebApi.EntityBuf
                             tp.Item1.Property == null ? string.Empty : ReflectionHelper.GetJsonPropertyName(tp.Item1.Property.PropertyInfo),
                             tp.Item1.ValueType.Name,
                             insb.ToString(),
-                            tp.Item1.Property == null ? string.Empty : ReflectionHelper.GetObjectDescription(tp.Item1.Property.PropertyInfo));
+                            tp.Item1.Property == null ? string.Empty : ReflectionHelper.GetObjectDescription(tp.Item1.Property));
                     }
                     else
                     {
                         DelSimple(isTypeArray2, tp.Item1, sb);
+                    }
+                }
+            }
+        }
+
+        private static void GetComplexInvokeHtml(bool isArray, EntityBufType bufType, StringBuilder sb)
+        {
+            if (isArray)
+            {
+                //StringBuilder insb = new StringBuilder("<table cellpadding=0 _obj=\"\"  cellspacing=0 border=\"0\">");
+                StringBuilder insb = new StringBuilder();
+                GetInvokeHtml(bufType.ClassType, true, insb);
+                //insb.Append("</table>");
+                sb.Append(insb.ToString());
+            }
+            else
+            {
+                bool isTypeArray2;
+                var entitybuftypelist = GetTypeEntityBufType(bufType.ClassType);
+                foreach (var tp in entitybuftypelist)
+                {
+                    isTypeArray2 = tp.Item2;
+
+                    if (tp.Item1.EntityType == EntityType.COMPLEX)
+                    {
+                        var ppname = tp.Item1.Property == null ? string.Empty : ReflectionHelper.GetJsonPropertyName(tp.Item1.Property.PropertyInfo);
+                        //这里加上属性
+                        StringBuilder insb = new StringBuilder(string.Format("<table cellpadding=0 _obj=\"1\" cellspacing=0 border=\"0\" {0} _call=\"attach,{1},{2}\">", isTypeArray2 ? "class=\"arraytable\"" : "", ppname, isTypeArray2));
+
+                        GetComplexInvokeHtml(isTypeArray2, tp.Item1, insb);
+                        insb.Append("</table>");
+
+                        sb.AppendFormat("<tr><td>{0}</td><td>{1}</td></tr>", ppname,
+                            insb.ToString());
+                    }
+                    else
+                    {
+                        GetSimpleInvokeHtml(isTypeArray2, tp.Item1, sb);
                     }
                 }
             }
@@ -124,7 +162,7 @@ namespace LJC.NetCoreFrameWork.WebApi.EntityBuf
                     string jsonpropname = bufType.Property != null ? ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo) : string.Empty;
                     if (!string.IsNullOrWhiteSpace(jsonpropname))
                     {
-                        sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo), bufType.EntityType.ToString().ToLower() + (isArray ? "[]" : ""), ReflectionHelper.GetObjectDescription(bufType.Property.PropertyInfo));
+                        sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo), bufType.EntityType.ToString().ToLower() + (isArray ? "[]" : ""), ReflectionHelper.GetObjectDescription(bufType.Property));
                     }
                     else
                     {
@@ -134,21 +172,21 @@ namespace LJC.NetCoreFrameWork.WebApi.EntityBuf
                 case EntityType.ENUM:
                     if (isArray)
                     {
-                        //sb.AppendFormat("<tr><td>{0}</td><td>{1}[]</td><td>{2}</td></tr>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo), "enum", string.Empty);
+                        sb.AppendFormat("<tr><td>{0}</td><td>{1}[]</td><td>{2}</td></tr>", bufType.Property == null ? string.Empty : ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo), "enum[]", ReflectionHelper.GetEnumDesc(bufType.ValueType));
                     }
                     else
                     {
-                        sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo), "enum", string.Empty);
+                        sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>", bufType.Property == null ? string.Empty : ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo), "enum", ReflectionHelper.GetEnumDesc(bufType.ValueType));
                     }
                     break;
                 case EntityType.DICTIONARY:
                     if (isArray)
                     {
-
+                        sb.AppendFormat("<td>{0}</td><td>{1}</td><td>{2}</td>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo), "Dictionary[]", ReflectionHelper.GetEnumDesc(bufType.Property.PropertyInfo.PropertyType));
                     }
                     else
                     {
-                        //Test(bufType.)
+                        sb.AppendFormat("<td>{0}</td><td>{1}</td><td>{2}</td>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo), "Dictionary", ReflectionHelper.GetEnumDesc(bufType.Property.PropertyInfo.PropertyType));
                     }
                     break;
                 case EntityType.LIST:
@@ -159,17 +197,168 @@ namespace LJC.NetCoreFrameWork.WebApi.EntityBuf
                     else
                     {
                         var listvaluetype = GetListValueType(bufType.ValueType);
-                        sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>", bufType.Property == null ? string.Empty : ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo), string.Format("List&lt;{0}&gt;", listvaluetype.Name), bufType.Property == null ? string.Empty : ReflectionHelper.GetObjectDescription(bufType.Property.PropertyInfo));
+                        sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>", bufType.Property == null ? string.Empty : ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo), string.Format("List&lt;{0}&gt;", listvaluetype.Name), bufType.Property == null ? string.Empty : ReflectionHelper.GetObjectDescription(bufType.Property));
 
                         bool isarray = false;
                         if (MapBufType(listvaluetype, out isarray).EntityType == EntityType.COMPLEX)
                         {
-                            StringBuilder sbinner = new StringBuilder("<table  style=\"border:solid 1px yellow;\" border=\"1\">");
+                            StringBuilder sbinner = new StringBuilder("<table  cellpadding=0 cellspacing=0 border=\"0\">");
                             sbinner.AppendFormat("<tr><th>参数名</th><th>参数类型</th><th>备注</th></tr>");
                             GetPropToTable(listvaluetype, sbinner);
                             sbinner.Append("</table>");
                             sb.AppendFormat("<tr><td colspan=\"3\">+{0}<br/>{1}</td></tr>", listvaluetype.Name, sbinner.ToString());
                         }
+                        else if (MapBufType(listvaluetype, out isarray).EntityType == EntityType.ENUM)
+                        {
+                            StringBuilder sbinner = new StringBuilder("<table  cellpadding=0 cellspacing=0 border=\"0\">");
+                            sbinner.AppendFormat("<tr><th>参数名</th><th>参数类型</th><th>备注</th></tr>");
+                            GetPropToTable(listvaluetype, sbinner);
+                            sbinner.Append("</table>");
+                            sb.AppendFormat("<tr><td colspan=\"3\">+{0}<br/>{1}</td></tr>", listvaluetype.Name, sbinner.ToString());
+                        }
+                    }
+                    break;
+                default:
+                    throw new Exception("错误");
+            }
+        }
+
+        private static void GetSimpleInvokeHtml(bool isArray, EntityBufType bufType, StringBuilder sb)
+        {
+            if (bufType.EntityType == EntityType.COMPLEX)
+            {
+                throw new Exception("无法处理复杂类型");
+            }
+
+            switch (bufType.EntityType)
+            {
+                case EntityType.SBYTE:
+                case EntityType.BYTE:
+                case EntityType.SHORT:
+                case EntityType.INT16:
+
+                case EntityType.INT32:
+
+                case EntityType.DECIMAL:
+                case EntityType.FLOAT:
+                case EntityType.DOUBLE:
+
+                case EntityType.INT64:
+                    {
+                        string jsonpropname = bufType.Property != null ? ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo) : string.Empty;
+                        if (!string.IsNullOrWhiteSpace(jsonpropname))
+                        {
+                            sb.AppendFormat("<tr><td>{0}</td><td>{1}</td></tr>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo),
+                                string.Format("<input _call=\"set,{0}\" type='text' value=''>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo)));
+                        }
+                        else
+                        {
+                            sb.AppendFormat("<tr><td>{0} {1}</td></tr>", "<input _call=\"set,data\" type='text' value=''>", isArray ? "<span class=\"spanbutton\" onclick=\"copyrow(this)\">+</span><span class=\"spanbutton\" onclick=\"remrow(this)\">-</span>" : string.Empty);
+                        }
+                        break;
+                    }
+                case EntityType.STRING:
+                case EntityType.DATETIME:
+                    {
+                        string jsonpropname = bufType.Property != null ? ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo) : string.Empty;
+                        if (!string.IsNullOrWhiteSpace(jsonpropname))
+                        {
+                            sb.AppendFormat("<tr><td>{0}</td><td>{1}</td></tr>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo),
+                                string.Format("<input _call=\"settext,{0}\" type='text' value=''>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo)));
+                        }
+                        else
+                        {
+                            sb.AppendFormat("<tr><td>{0} {1}</td></tr>", "<input _call=\"settext,data\" type='text' value=''>", isArray ? "<span class=\"spanbutton\" onclick=\"copyrow(this)\">+</span><span class=\"spanbutton\" onclick=\"remrow(this)\">-</span>" : string.Empty);
+                        }
+                        break;
+                    }
+                case EntityType.BOOL:
+                    {
+                        string jsonpropname = bufType.Property != null ? ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo) : string.Empty;
+                        if (!string.IsNullOrWhiteSpace(jsonpropname))
+                        {
+                            sb.AppendFormat("<tr><td>{0}</td><td><input _call=\"setbool,{0}\" type='checkbox'/></td></tr>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo));
+                        }
+                        else
+                        {
+                            sb.AppendFormat("<tr><td>{0} {1}</td></tr>", "<input _call=\"settext,data\" type='checkbox'/>", isArray ? "<span class=\"spanbutton\" onclick=\"copyrow(this)\">+</span><span class=\"spanbutton\" onclick=\"remrow(this)\">-</span>" : string.Empty);
+                        }
+                        break;
+                    }
+                case EntityType.ENUM:
+                    {
+                        sb.AppendFormat("<tr>{0}<td {1}><select _call=\"settext,{2}\">", bufType.Property == null ? string.Empty : ("<td>" + ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo) + "</td>"), isArray ? "class=\"arraytd\"" : "",
+                            bufType.Property == null ? string.Empty : ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo));
+                        foreach (var item in Enum.GetNames(bufType.ValueType))
+                        {
+                            sb.AppendFormat("<option value =\"{0}\">{0}</option>", item);
+                        }
+                        sb.AppendFormat("</select> {0}</td></tr>", isArray ? "<span class=\"spanbutton\" onclick=\"copyrow(this)\">+</span><span class=\"spanbutton\" onclick=\"remrow(this)\">-</span>" : string.Empty);
+                    }
+                    break;
+                case EntityType.DICTIONARY:
+                    {
+                        sb.AppendFormat("<tr><td>{0}</td><td>", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo));
+                        sb.Append(string.Format("<table obj=\"\" _call=\"attach,{0},false\">", ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo)));
+                        sb.Append("<tr>");
+                        sb.AppendFormat("<td><input type='text'/>:<input _call=\"setdic\" type='text'/></td><td><span class=\"spanbutton\" onclick=\"copyrow(this)\">+</span><span class=\"spanbutton\" onclick=\"remrow(this)\">-</span></td>");
+                        sb.Append("</tr>");
+                        sb.Append("</table>");
+                        sb.Append("</td></tr>");
+                        break;
+                    }
+                case EntityType.LIST:
+                    {
+                        var ppname = ReflectionHelper.GetJsonPropertyName(bufType.Property.PropertyInfo);
+
+                        var listvaluetype = GetListValueType(bufType.ValueType);
+
+                        bool isarray = false;
+                        if (MapBufType(listvaluetype, out isarray).EntityType == EntityType.COMPLEX)
+                        {
+                            if (!string.IsNullOrEmpty(ppname))
+                            {
+                                sb.AppendFormat("<tr><td>{0}</td><td><table obj=\"\" _call=\"attach,{0},True\">", ppname);
+                            }
+                            StringBuilder sbinner = new StringBuilder();
+                            GetInvokeHtml(listvaluetype, true, sbinner);
+                            //sbinner.Append("</table>");
+                            sb.Append(sbinner.ToString());
+                            if (!string.IsNullOrEmpty(ppname))
+                            {
+                                sb.Append("</table></td></tr>");
+                            }
+                        }
+                        else
+                        {
+                            if (isarray)
+                            {
+
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrEmpty(ppname))
+                                {
+                                    sb.AppendFormat("<tr><td>{0}</td><td><table obj=\"\" _call=\"attach,{0},True\">", ppname);
+                                }
+                                StringBuilder sbinner = new StringBuilder();
+                                bool subisarray = false;
+                                GetSimpleInvokeHtml(true, new EntityBufType
+                                {
+                                    ClassType = listvaluetype,
+                                    ValueType = listvaluetype,
+                                    EntityType = MapBufType(listvaluetype, out subisarray).EntityType,
+                                    Property = null
+                                }, sbinner);
+                                sb.Append(sbinner.ToString());
+                                if (!string.IsNullOrEmpty(ppname))
+                                {
+                                    sb.Append("</table></td></tr>");
+                                }
+                            }
+                        }
+
+
                     }
                     break;
                 default:
@@ -191,6 +380,29 @@ namespace LJC.NetCoreFrameWork.WebApi.EntityBuf
             {
                 DelComplex(touple.Item2, touple.Item1, sb);
             }
+        }
+
+        public static void GetInvokeHtml(Type type, bool array, StringBuilder sb)
+        {
+            Tuple<EntityBufType, bool> tuple = GetTypeBufType(type);
+            StringBuilder innsersb = new StringBuilder();
+            // touple.Item1
+            innsersb.AppendFormat("<table cellpadding=0 cellspacing=0 _obj=\"1\" border=\"0\" {0} _call=\"attach,{1},{2}\">", tuple.Item2 ? "class=\"arraytable\"" : "",
+                tuple.Item1.Property == null ? string.Empty : ReflectionHelper.GetJsonPropertyName(tuple.Item1.Property.PropertyInfo), tuple.Item2);
+            if (array)
+            {
+                innsersb.AppendFormat("<tr><td>+{0}</td><td><span class=\"spanbutton\" onclick=\"copytable(this)\">+</span><span class=\"spanbutton\" onclick=\"remtable(this)\">-</span></td></tr>", type.Name);
+            }
+            if (tuple.Item1.EntityType != EntityType.COMPLEX)
+            {
+                GetSimpleInvokeHtml(tuple.Item2, tuple.Item1, innsersb);
+            }
+            else
+            {
+                GetComplexInvokeHtml(tuple.Item2, tuple.Item1, innsersb);
+            }
+            innsersb.Append("</table>");
+            sb.AppendFormat("<tr><td colspan=\"2\">{0}</td></tr>", innsersb.ToString());
         }
 
         private static List<Tuple<EntityBufType, bool>> GetTypeEntityBufType(Type tp)
