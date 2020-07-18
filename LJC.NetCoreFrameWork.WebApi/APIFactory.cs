@@ -42,7 +42,7 @@ namespace LJC.NetCoreFrameWork.WebApi
         {
             try
             {
-                var methed = url.Substring(url.LastIndexOf('/') + 1).ToLower();
+                var methed = url.Split('?')[0].Substring(url.LastIndexOf('/') + 1).ToLower();
 
                 if ("invoke".Equals(methed))
                 {

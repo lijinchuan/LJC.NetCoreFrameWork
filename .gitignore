@@ -1,6 +1,4 @@
-/LJC.NetCoreFrameWork/bin
-/LJC.NetCoreFrameWork/obj
-/LJC.NetCoreFrameWork.Net/bin
-/LJC.NetCoreFrameWork.Net/obj
-/LJC.NetCoreFrameWork.WebApi/bin
-/LJC.NetCoreFrameWork.WebApi/obj
+bin
+obj
+.vs
+*.user
