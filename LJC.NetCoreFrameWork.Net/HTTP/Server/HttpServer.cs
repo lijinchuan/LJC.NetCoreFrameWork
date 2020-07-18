@@ -190,16 +190,7 @@ namespace LJC.NetCoreFrameWork.Net.HTTP.Server
 
         public static string URLDecode(string input)
         {
-            StringBuilder output = new StringBuilder();
-            int p;
-            while ((p = input.IndexOf('%')) >= 0)
-            {
-                output.Append(input.Substring(0, p));
-                string hexNumber = input.Substring(p + 1, 2);
-                input = input.Substring(p + 3);
-                output.Append((char)int.Parse(hexNumber, System.Globalization.NumberStyles.HexNumber));
-            }
-            return output.Append(input).ToString();
+            return System.Web.HttpUtility.UrlDecode(input);
         }
 
         protected virtual bool Process(ClientInfo ci, HttpRequest req)
