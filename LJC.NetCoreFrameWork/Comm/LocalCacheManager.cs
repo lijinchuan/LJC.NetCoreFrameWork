@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LJC.NetCoreFrameWork.Comm
 {
@@ -93,12 +94,12 @@ namespace LJC.NetCoreFrameWork.Comm
                         }
                     }
 
-                    new Action(() =>
+                    Task.Run(() =>
                     {
                         string cachfile = _WorkCached + x.Key + ".dat";
                         SerializerHelper.BinarySave(cachfile, result);
 
-                    }).BeginInvoke(null, null);
+                    });
 
                     //LogHelper.Instance.Info("后台更新缓存完成:" + x.Key);
                 }
@@ -232,7 +233,7 @@ namespace LJC.NetCoreFrameWork.Comm
 
                         if (object.Equals(val.Item, default(T)) && !object.Equals(val.Item = reflashFunc(), default(T)))
                         {
-                            new Action(() => SerializerHelper.BinarySave(cachfile, val.Item)).BeginInvoke(null, null);
+                            Task.Run(() => SerializerHelper.BinarySave(cachfile, val.Item));
                         }
 
                         if (!object.Equals(val.Item, default(T)))

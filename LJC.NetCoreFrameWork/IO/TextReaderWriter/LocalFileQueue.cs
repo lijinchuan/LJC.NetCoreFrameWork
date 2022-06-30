@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace LJC.NetCoreFrameWork.IO.TextReaderWriter
 {
@@ -175,7 +176,7 @@ namespace LJC.NetCoreFrameWork.IO.TextReaderWriter
 
                 if (!IsRuning && _queueReader != null)
                 {
-                    new Action(ProcessQueue).BeginInvoke(null, null);
+                    Task.Run(ProcessQueue);
                 }
 
                 SaveConfig();

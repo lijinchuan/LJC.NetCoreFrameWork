@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Linq;
 using LJC.NetCoreFrameWork.EntityBuf;
+using System.Threading.Tasks;
 
 namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
 {
@@ -75,7 +76,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                         udpBCSocket.ReceiveBufferSize = 32000;
                         udpBCSocket.SendBufferSize = 32000;
 
-                        new Action(ReceivingBroadCast).BeginInvoke(null, null);
+                        Task.Run(ReceivingBroadCast);
                     }
                 }
             }
@@ -113,7 +114,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                         //udpMCClient = new UdpClient(SocketApplicationComm.MCAST_PORT);
                         //udpMCClient.JoinMulticastGroup(SocketApplicationComm.MCAST_ADDR);
 
-                        new Action(ReceivingMultiCast).BeginInvoke(null, null);
+                        Task.Run(ReceivingMultiCast);
                     }
                 }
             }
@@ -539,7 +540,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             if (socketClient != null && errorResume && !socketClient.Connected)
             {
                 e.Data.Add("checksocket", "需要发起重连");
-                new Action(() => StartClient()).BeginInvoke(null, null);
+                Task.Run(() => StartClient());
             }
             else
             {
@@ -597,12 +598,12 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                     var buffer = ReceivingNext(socket);
 
                     //搞成异步的
-                    new Action<byte[], Session>((b, s) =>
+                    Task.Run(() =>
                     {
-                        Message message = EntityBufCore.DeSerialize<Message>(b);
-                        s.LastSessionTime = DateTime.Now;
-                        FormApp(message, s);
-                    }).BeginInvoke(buffer, appSocket, null, null);
+                        Message message = EntityBufCore.DeSerialize<Message>(buffer);
+                        appSocket.LastSessionTime = DateTime.Now;
+                        FormApp(message, appSocket);
+                    });
                 }
                 catch (SessionAbortException exp)
                 {

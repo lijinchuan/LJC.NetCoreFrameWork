@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LJC.NetCoreFrameWork.SOA
 {
@@ -51,7 +52,7 @@ namespace LJC.NetCoreFrameWork.SOA
                 var notice = message.GetMessageBody<Contract.SOANoticeClientMessage>();
                 if (OnNotice != null)
                 {
-                    OnNotice.BeginInvoke(notice, null, null);
+                    Task.Run(() => OnNotice(notice));
                 }
                 return;
             }
@@ -196,7 +197,7 @@ namespace LJC.NetCoreFrameWork.SOA
 
                 if (takecleint)
                 {
-                    new Action(() =>
+                    Task.Run(() =>
                     {
                         var respserviceinfo = DoSOARequest<GetRegisterServiceInfoResponse>(Consts.ESBServerServiceNo, Consts.FunNo_GetRegisterServiceInfo, new GetRegisterServiceInfoRequest
                         {
@@ -326,7 +327,7 @@ namespace LJC.NetCoreFrameWork.SOA
                                 }
                             }
                         }
-                    }).BeginInvoke(null, null);
+                    });
                 }
             }
 

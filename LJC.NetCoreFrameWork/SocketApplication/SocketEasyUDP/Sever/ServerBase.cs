@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasyUDP.Sever
 {
@@ -135,7 +136,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasyUDP.Sever
 
         private void CreateMessagePipeline(IPEndPoint endpoint, PipelineManualResetEventSlim slim, long bagid, string pipelinekey)
         {
-            new Action(() =>
+            Task.Run(() =>
             {
                 int trytimes = 0;
                 try
@@ -167,14 +168,14 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasyUDP.Sever
                     ClearTempBag(bagid, endpoint);
                 }
 
-            }).BeginInvoke(null, null);
+            });
         }
 
         public void StartServer()
         {
             BindIps();
 
-            new Action(() =>
+            Task.Run(() =>
             {
                 while (true)
                 {
@@ -222,7 +223,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasyUDP.Sever
                         }
                     }
                 }
-            }).BeginInvoke(null, null);
+            });
         }
 
         private void DispatchMessage(Message message, IPEndPoint endpoint)

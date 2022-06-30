@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Linq;
 using LJC.NetCoreFrameWork.EntityBuf;
+using System.Threading.Tasks;
 
 namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasy
 {
@@ -58,7 +59,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasy
                         udpBCSocket.ReceiveBufferSize = 32000;
                         udpBCSocket.SendBufferSize = 32000;
 
-                        new Action(ReceivingBroadCast).BeginInvoke(null, null);
+                        Task.Run(ReceivingBroadCast);
                     }
                 }
             }
@@ -96,7 +97,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasy
                         //udpMCClient = new UdpClient(SocketApplicationComm.MCAST_PORT);
                         //udpMCClient.JoinMulticastGroup(SocketApplicationComm.MCAST_ADDR);
 
-                        new Action(ReceivingMultiCast).BeginInvoke(null, null);
+                        Task.Run(ReceivingMultiCast);
                     }
                 }
             }

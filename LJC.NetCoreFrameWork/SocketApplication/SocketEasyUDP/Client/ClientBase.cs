@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasyUDP.Client
 {
@@ -298,7 +299,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasyUDP.Client
 
         private void CreateMessagePipeline(PipelineManualResetEventSlim slim, long bagid)
         {
-            new Action(() =>
+            Task.Run(() =>
             {
                 try
                 {
@@ -323,7 +324,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasyUDP.Client
                     _pipelineSlimDic.Remove(bagid);
                 }
 
-            }).BeginInvoke(null, null);
+            });
         }
 
         private void OnMessage(byte[] data)
