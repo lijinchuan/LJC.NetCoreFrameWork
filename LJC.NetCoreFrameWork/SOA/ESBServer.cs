@@ -12,7 +12,7 @@ namespace LJC.NetCoreFrameWork.SOA
     {
         private static object LockObj = new object();
         protected List<ESBServiceInfo> ServiceContainer = new List<ESBServiceInfo>();
-        internal Dictionary<string, SocketApplication.Session> ClientSessionList = new Dictionary<string, SocketApplication.Session>();
+        internal Dictionary<string, SocketApplication.Session[]> ClientSessionList = new Dictionary<string, SocketApplication.Session[]>();
         internal static ReaderWriterLockSlim ConatinerLock = new ReaderWriterLockSlim();
 
         private string ManagerWebPortStr = System.Configuration.ConfigurationManager.AppSettings["esbmanport"];
@@ -57,7 +57,7 @@ namespace LJC.NetCoreFrameWork.SOA
                         sb.AppendFormat("<td>{0}</td>", gp.Key);
                         sb.Append("<td>");
                         sb.Append("<table>");
-                        sb.Append("<tr><th>ID</th><th>服务器地址</th><th>TCP直连</th><th>UDP直连</th></tr>");
+                        sb.Append("<tr><th>服务名称</th><th>端点名称</th><th>ID</th><th>服务器地址</th><th>TCP直连</th><th>UDP直连</th></tr>");
                         foreach (var item in gp)
                         {
                             if (DateTime.Now.Subtract(item.Session.LastSessionTime).TotalMinutes > 1)
@@ -68,7 +68,7 @@ namespace LJC.NetCoreFrameWork.SOA
                                 }
                             }
 
-                            sb.AppendFormat("<tr><td>{0}</td><td>{1}:{2}</td><td>{3}</td><td>{4}</td></tr>", item.Session.SessionID, item.Session.IPAddress, item.Session.Port,
+                            sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}:{4}</td><td>{5}</td><td>{6}</td></tr>",item.ServiceName, item.EndPointName, item.Session.SessionID, item.Session.IPAddress, item.Session.Port,
                                 item.RedirectTcpIps == null ? "" : (string.Join(",", item.RedirectTcpIps) + ":" + item.RedirectTcpPort),
                                 item.RedirectUdpIps == null ? "" : (string.Join(",", item.RedirectUdpIps) + ":" + item.RedirectUdpPort));
                         }
@@ -108,15 +108,15 @@ namespace LJC.NetCoreFrameWork.SOA
 
                 //客户端
                 sb.Append("<br/>");
-                clients = _esb.ClientSessionList.Select(p => p).ToList();
-                sb.AppendFormat("当前活跃{0}个客户端", clients.Count);
+                var liveclients = _esb.ClientSessionList.Select(p => p).ToList();
+                sb.AppendFormat("当前活跃{0}个客户端", liveclients.Count);
                 sb.Append("<table>");
                 sb.Append("<tr>");
                 sb.AppendFormat("<th>任务ID</th><th>clientid</th><th>地址</th><th>连接时间</th><th>上次心跳时间</th><th>连接时长(分钟)</th><th>发送字节</th><th>接收字节</th>");
                 sb.Append("</tr>");
-                foreach (var item in clients)
+                foreach (var item in liveclients)
                 {
-                    if (!clienthash.Contains(item.Value.SessionID))
+                    if (!clienthash.Contains(item.Value[0].SessionID) || !clienthash.Contains(item.Value[1].SessionID))
                     {
                         lock (_esb.ClientSessionList)
                         {
@@ -124,10 +124,10 @@ namespace LJC.NetCoreFrameWork.SOA
                         }
                     }
 
-                    sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}:{3}</td><td>{4}</td><td>{5}</td><td>{6}</td><td>{7}</td><td>{8}</td></tr>", item.Key, item.Value.SessionID, item.Value.IPAddress, item.Value.Port,
-                        item.Value.ConnectTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                        item.Value.LastSessionTime.ToString("yyyy-MM-dd HH:mm:ss"), Math.Round(item.Value.LastSessionTime.Subtract(item.Value.ConnectTime).TotalMinutes, 3),
-                        item.Value.BytesSend, item.Value.BytesRev);
+                    sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}:{3}</td><td>{4}</td><td>{5}</td><td>{6}</td><td>{7}</td><td>{8}</td></tr>", item.Key, item.Value[0].SessionID, item.Value[0].IPAddress, item.Value[0].Port,
+                        item.Value[0].ConnectTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                        item.Value[0].LastSessionTime.ToString("yyyy-MM-dd HH:mm:ss"), Math.Round(item.Value[0].LastSessionTime.Subtract(item.Value[0].ConnectTime).TotalMinutes, 3),
+                        item.Value[0].BytesSend, item.Value[0].BytesRev);
                 }
                 sb.Append("</table>");
 
@@ -160,7 +160,7 @@ namespace LJC.NetCoreFrameWork.SOA
         {
             try
             {
-                Session session = null;
+                Session[] session = null;
 
                 ConatinerLock.EnterReadLock();
                 ClientSessionList.TryGetValue(response.ClientTransactionID, out session);
@@ -180,14 +180,14 @@ namespace LJC.NetCoreFrameWork.SOA
                     resp.Result = response.Result;
 
                     msgRet.SetMessageBody(resp);
-                    session.SendMessage(msgRet);
+                    session[0].SendMessage(msgRet);
 
-                    var toulp = (Tuple<int, int>)session.Tag;
+                    var toulp = (Tuple<int, int>)session[0].Tag;
 
                     //if (SocketApplicationEnvironment.TraceMessage)
                     //{
                     //    LogHelper.Instance.Debug(string.Format("SOA响应耗时,请求序列号:{0},服务号:{1},功能号:{2},用时:{3},结果:{4}",
-                    //        response.ClientTransactionID, toulp.Item1, toulp.Item2, DateTime.Now.Subtract(session.BusinessTimeStamp).TotalMilliseconds + "毫秒",
+                    //        response.ClientTransactionID, toulp.Item1, toulp.Item2, DateTime.Now.Subtract(session[0].BusinessTimeStamp).TotalMilliseconds + "毫秒",
                     //        Convert.ToBase64String(response.Result)));
                     //}
                 }
@@ -337,7 +337,7 @@ namespace LJC.NetCoreFrameWork.SOA
                         try
                         {
                             ConatinerLock.EnterWriteLock();
-                            ClientSessionList.Add(msgTransactionID, session);
+                            ClientSessionList.Add(msgTransactionID, new Session[2] { session, serviceInfo.Session });
                         }
                         finally
                         {
@@ -404,6 +404,8 @@ namespace LJC.NetCoreFrameWork.SOA
                         {
                             ServiceNo = req.ServiceNo,
                             Session = session,
+                            EndPointName = message.GetCustomData("EndPointName") ?? string.Empty,
+                            ServiceName = message.GetCustomData("ServiceName") ?? string.Empty,
                             RedirectTcpIps = req.RedirectTcpIps,
                             RedirectTcpPort = req.RedirectTcpPort,
                             RedirectUdpIps = req.RedirectUdpIps,

@@ -26,5 +26,11 @@ namespace LJC.NetCoreFrameWork.SocketApplication
             get;
             set;
         }
+
+        public Dictionary<string, string> CustomData
+        {
+            get;
+            set;
+        }
     }
 }
