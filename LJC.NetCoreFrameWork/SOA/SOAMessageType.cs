@@ -16,6 +16,7 @@ namespace LJC.NetCoreFrameWork.SOA
         DoSOARedirectResponse,
         SOANoticeRequest,
         SOANoticeResponse,
-        SOANoticeClientMessage
+        SOANoticeClientMessage,
+        QueryServiceNo
     }
 }

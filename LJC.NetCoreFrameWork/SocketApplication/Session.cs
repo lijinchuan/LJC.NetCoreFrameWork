@@ -147,6 +147,25 @@ namespace LJC.NetCoreFrameWork.SocketApplication
             this.IsValid = false;
         }
 
+        public bool Close(string closeReason)
+        {
+            if (this.Socket != null)
+            {
+                try
+                {
+                    this.Socket.Shutdown(SocketShutdown.Both);
+                }
+                catch
+                {
+
+                }
+                this.Socket.Close();
+                return true;
+            }
+            this.IsValid = false;
+            return false;
+        }
+
         public virtual bool SendMessage(Message msg)
         {
             if (this.Socket == null)

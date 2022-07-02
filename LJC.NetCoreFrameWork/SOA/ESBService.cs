@@ -110,7 +110,19 @@ namespace LJC.NetCoreFrameWork.SOA
 
         protected sealed override void ReciveMessage(Message message)
         {
-            if (message.IsMessage((int)SOAMessageType.DoSOATransferRequest))
+            if (message.IsMessage((int)SOAMessageType.QueryServiceNo))
+            {
+                var responseMsg = new Message((int)SOAMessageType.QueryServiceNo);
+                responseMsg.MessageHeader.TransactionID = message.MessageHeader.TransactionID;
+                QueryServiceNoResponse responseBody = new QueryServiceNoResponse();
+                responseBody.ServiceNo = ServiceNo;
+
+                responseMsg.SetMessageBody(responseBody);
+                SendMessage(responseMsg);
+
+                return;
+            }
+            else if (message.IsMessage((int)SOAMessageType.DoSOATransferRequest))
             {
                 SOATransferRequest request = null;
                 try
@@ -152,7 +164,7 @@ namespace LJC.NetCoreFrameWork.SOA
 
                     responseMsg.SetMessageBody(responseBody);
 
-                    this.SendMessage(responseMsg);
+                    SendMessage(responseMsg);
 
                     return;
                 }
@@ -367,7 +379,7 @@ namespace LJC.NetCoreFrameWork.SOA
                         {
                             iport = SocketApplicationComm.GetIdelTcpPort();
 
-                            RedirectTcpServiceServer = new ESBRedirectService(bindips.Select(p => p.ToString()).ToArray(), iport);
+                            RedirectTcpServiceServer = new ESBRedirectService(ServiceNo, bindips.Select(p => p.ToString()).ToArray(), iport);
                             RedirectTcpServiceServer.DoResponseAction = DoResponse;
                             RedirectTcpServiceServer.StartServer();
                             break;
@@ -393,7 +405,7 @@ namespace LJC.NetCoreFrameWork.SOA
                         {
                             iport = SocketApplicationComm.GetIdelUdpPort(iport);
 
-                            RedirectUpdServiceServer = new ESBUDPService(bindips.Select(p => p.ToString()).ToArray(), iport);
+                            RedirectUpdServiceServer = new ESBUDPService(ServiceNo, bindips.Select(p => p.ToString()).ToArray(), iport);
                             RedirectUpdServiceServer.DoResponseAction = DoResponse;
                             RedirectUpdServiceServer.StartServer();
                             break;

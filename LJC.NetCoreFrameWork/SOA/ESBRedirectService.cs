@@ -1,5 +1,6 @@
 ﻿using LJC.NetCoreFrameWork.EntityBuf;
 using LJC.NetCoreFrameWork.SOA.Contract;
+using LJC.NetCoreFrameWork.SocketApplication;
 using LJC.NetCoreFrameWork.SocketApplication.SocketEasy.Sever;
 using System;
 using System.Collections.Generic;
@@ -11,10 +12,13 @@ namespace LJC.NetCoreFrameWork.SOA
     {
         public Func<int, byte[], string, object> DoResponseAction;
 
-        public ESBRedirectService(string[] ips, int port)
+        private int _serviceNo;
+
+        public ESBRedirectService(int serviceNo, string[] ips, int port)
             : base(ips, port)
         {
             ServerModeNeedLogin = false;
+            _serviceNo = serviceNo;
         }
 
         public string[] GetBindIps()
@@ -29,13 +33,29 @@ namespace LJC.NetCoreFrameWork.SOA
 
         protected override void FromApp(SocketApplication.Message message, SocketApplication.Session session)
         {
-            if (message.IsMessage((int)SOAMessageType.DoSOARedirectRequest))
+            if (message.IsMessage((int)SOAMessageType.QueryServiceNo))
+            {
+                var responseMsg = new Message((int)SOAMessageType.QueryServiceNo);
+                responseMsg.MessageHeader.TransactionID = message.MessageHeader.TransactionID;
+                QueryServiceNoResponse responseBody = new QueryServiceNoResponse();
+                responseBody.ServiceNo = _serviceNo;
+
+                responseMsg.SetMessageBody(responseBody);
+                session.SendMessage(responseMsg);
+
+                return;
+            }
+            else if (message.IsMessage((int)SOAMessageType.DoSOARedirectRequest))
             {
                 try
                 {
+                    var reqbag = EntityBuf.EntityBufCore.DeSerialize<SOARedirectRequest>(message.MessageBuffer);
+                    if (reqbag.ServiceNo != _serviceNo)
+                    {
+                        throw new Exception(Consts.ERRORSERVICEMSG);
+                    }
                     if (DoResponseAction != null)
                     {
-                        var reqbag = EntityBufCore.DeSerialize<SOARedirectRequest>(message.MessageBuffer);
                         var obj = DoResponseAction(reqbag.FuncId, reqbag.Param, session.SessionID);
 
                         if (!string.IsNullOrWhiteSpace(message.MessageHeader.TransactionID))
@@ -55,6 +75,10 @@ namespace LJC.NetCoreFrameWork.SOA
                             throw new Exception("服务未实现");
                         }
                     }
+                    else
+                    {
+                        throw new Exception("服务无法处理");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -73,6 +97,11 @@ namespace LJC.NetCoreFrameWork.SOA
                     catch (Exception exx)
                     {
                         OnError(exx);
+                    }
+
+                    if (ex.Message.Contains(Consts.ERRORSERVICEMSG))
+                    {
+                        session.Close(Consts.ERRORSERVICEMSG);
                     }
                 }
             }

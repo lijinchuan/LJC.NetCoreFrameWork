@@ -79,7 +79,7 @@ namespace LJC.NetCoreFrameWork.IO.TextReaderWriter
                     case ObjTextReaderWriterEncodeType.protobufex:
                     case ObjTextReaderWriterEncodeType.protobuf:
                         {
-                            return ProtoBuf.Serializer.Deserialize<T>(ms);
+                            throw new NotImplementedException();
                         }
                     case ObjTextReaderWriterEncodeType.jsonbuf:
                     case ObjTextReaderWriterEncodeType.jsonbufex:
@@ -180,7 +180,7 @@ namespace LJC.NetCoreFrameWork.IO.TextReaderWriter
 
                         using (MemoryStream ms = new MemoryStream(contentbyte))
                         {
-                            return ProtoBuf.Serializer.Deserialize<T>(ms);
+                            throw new NotImplementedException();
                         }
                     }
                 case ObjTextReaderWriterEncodeType.jsonbuf:

@@ -108,8 +108,7 @@ namespace LJC.NetCoreFrameWork.IO.TextReaderWriter
                             {
                                 using (MemoryStream ms = new MemoryStream())
                                 {
-                                    ProtoBuf.Serializer.Serialize<T>(ms, obj);
-                                    offset = Append(tempms.BaseStream, ms.ToArray(), true);
+                                    throw new NotImplementedException();
                                 }
                                 break;
                             }
@@ -183,8 +182,7 @@ namespace LJC.NetCoreFrameWork.IO.TextReaderWriter
                     {
                         using (MemoryStream ms = new MemoryStream())
                         {
-                            ProtoBuf.Serializer.Serialize<T>(ms, obj);
-                            offset = Append(ms.ToArray(), true);
+                            throw new NotImplementedException();
                         }
                         break;
                     }
