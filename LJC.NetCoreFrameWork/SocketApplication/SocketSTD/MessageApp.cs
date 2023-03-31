@@ -439,6 +439,23 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                     var buffer = ReceivingNext(socketClient);
                     ThreadPool.QueueUserWorkItem(new WaitCallback(ProcessMessage), buffer);
                 }
+                catch (SocketApplicationException e)
+                {
+                    if (!_isStartingClient)
+                    {
+                        try
+                        {
+                            socketClient.Shutdown(SocketShutdown.Both);
+                        }
+                        catch
+                        {
+
+                        }
+                        socketClient.Close();
+                        OnError(e);
+                    }
+                    Thread.Sleep(1000);
+                }
                 catch (SocketException e)
                 {
                     OnError(e);
@@ -447,6 +464,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                 catch (Exception e)
                 {
                     OnError(e);
+                    Thread.Sleep(1000);
                 }
             }
             socketClient.Shutdown(SocketShutdown.Both);
