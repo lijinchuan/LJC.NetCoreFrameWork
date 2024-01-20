@@ -16,7 +16,9 @@ namespace LJC.NetCoreFrameWork.Comm
         /// <param name="o"></param>
         public static void BinarySave(string path, object o)
         {
+#pragma warning disable SYSLIB0011 // 类型或成员已过时
             BinaryFormatter bf = new BinaryFormatter();
+#pragma warning restore SYSLIB0011 // 类型或成员已过时
             using (FileStream ms = new FileStream(path, FileMode.Create))
             {
                 bf.Serialize(ms, o);
@@ -34,7 +36,9 @@ namespace LJC.NetCoreFrameWork.Comm
 
             try
             {
+#pragma warning disable SYSLIB0011 // 类型或成员已过时
                 BinaryFormatter bf = new BinaryFormatter();
+#pragma warning restore SYSLIB0011 // 类型或成员已过时
 
                 using (FileStream fs = new FileStream(path, FileMode.Open))
                 {
@@ -51,7 +55,9 @@ namespace LJC.NetCoreFrameWork.Comm
 
         public static object Clone(object source)
         {
+#pragma warning disable SYSLIB0011 // 类型或成员已过时
             BinaryFormatter bf = new BinaryFormatter();
+#pragma warning restore SYSLIB0011 // 类型或成员已过时
             using (MemoryStream ms = new MemoryStream())
             {
                 bf.Serialize(ms, source);

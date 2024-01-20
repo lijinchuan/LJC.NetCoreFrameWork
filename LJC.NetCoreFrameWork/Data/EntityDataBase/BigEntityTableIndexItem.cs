@@ -200,7 +200,7 @@ namespace LJC.NetCoreFrameWork.Data.EntityDataBase
                         }
                     case EntityType.BYTE:
                         {
-                            var keybytes = BitConverter.GetBytes((byte)o);
+                            var keybytes = new byte[] { (byte)o};
                             ms.Write(keybytes, 0, keybytes.Length);
                             break;
                         }

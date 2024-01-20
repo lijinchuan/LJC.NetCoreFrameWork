@@ -5,6 +5,9 @@ using System.Linq;
 using LJC.NetCoreFrameWork.Comm;
 using System.Net.Sockets;
 using System.IO;
+using System.Threading;
+using System.Diagnostics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LJC.NetCoreFrameWork.SOA
 {
@@ -37,6 +40,28 @@ namespace LJC.NetCoreFrameWork.SOA
             set;
         }
 
+        private static bool FindFile(string baseDir, string fileName,ref string fullPath)
+        {
+            Trace.WriteLine("searching:" + baseDir);
+            var path = Path.Combine(baseDir, fileName);
+
+            if (File.Exists(path))
+            {
+                fullPath = path;
+                return true;
+            }
+
+            foreach(var dir in  Directory.GetDirectories(baseDir))
+            {
+                if(FindFile(dir, fileName,ref fullPath))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static ESBConfig _esbConfig = null;
         public static ESBConfig ReadConfig()
         {
@@ -44,17 +69,13 @@ namespace LJC.NetCoreFrameWork.SOA
                 return _esbConfig;
             if (!File.Exists(configfile))
             {
-                string configfile2 = AppDomain.CurrentDomain.BaseDirectory + "ESBConfig.xml";
-                if (!File.Exists(configfile2))
+                var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                if (!FindFile(baseDir,configfile,ref configfile))
                 {
-                    throw new Exception(string.Format("未找到ESBConfig配置文件，路径：{0} 和路径 {1}", configfile, configfile2));
+                    return null;
                 }
-                else
-                {
-                    configfile = configfile2;
-                }
+                
             }
-
 
             _esbConfig = SerializerHelper.DeSerializerFile<ESBConfig>(configfile, true);
             if (_esbConfig.ESBServer.IndexOf('.') == -1
