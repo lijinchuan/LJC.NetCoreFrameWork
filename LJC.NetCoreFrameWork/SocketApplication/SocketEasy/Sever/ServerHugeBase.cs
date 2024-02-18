@@ -252,15 +252,21 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasy.Sever
 
             _connectSocketDic.TryAdd(appSocket.SessionID, appSocket);
 
-            if (!socket.ReceiveAsync(socketAsyncEventArgs))
+            try
             {
-                //Session old;
-                //_connectSocketDic.TryRemove(appSocket.SessionID, out old);
-                //RealseSocketAsyncEventArgs(socketAsyncEventArgs);
+                if (!socket.ReceiveAsync(socketAsyncEventArgs))
+                {
+                    //Session old;
+                    //_connectSocketDic.TryRemove(appSocket.SessionID, out old);
+                    //RealseSocketAsyncEventArgs(socketAsyncEventArgs);
 
-                //LogManager.LogHelper.Instance.Debug(socket.Handle + "同步完成，手动处理");
-
+                    SocketAsyncEventArgs_Completed(null, e);
+                }
+            }
+            catch (Exception ex)
+            {
                 SocketAsyncEventArgs_Completed(null, e);
+                OnError(new Exception("socket.ReceiveAsync(socketAsyncEventArgs)出错", ex));
             }
         }
 
