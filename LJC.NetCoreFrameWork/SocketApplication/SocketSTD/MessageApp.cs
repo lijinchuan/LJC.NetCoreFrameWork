@@ -8,6 +8,9 @@ using System.Threading;
 using System.Linq;
 using LJC.NetCoreFrameWork.EntityBuf;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+using System.Net.NetworkInformation;
+using System.Numerics;
 
 namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
 {
@@ -131,6 +134,13 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
         public event Action<Message> OnMultiCast;
 
         public event Action<Exception> Error;
+
+        public event Action<string> Warn;
+
+        public event Action<string> Info;
+
+        public event Action<string> Debug;
+
         /// <summary>
         /// 对象清理之前的事件
         /// </summary>
@@ -200,7 +210,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             }
             catch (Exception ex)
             {
-
+                OnError(ex);
             }
         }
 
@@ -276,9 +286,9 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                     throw ne;
 
                 }
-                catch (Exception e)
+                catch
                 {
-                    throw e;
+                    throw;
                 }
 
                 if (!isStartClient && listeningThread == null)
@@ -288,6 +298,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                 }
 
                 isStartClient = true;
+                OnDebug("客户端连接成功");
 
                 if (isResetClient && OnClientReset != null)
                 {
@@ -298,7 +309,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             }
             catch (Exception e)
             {
-                //OnError(e);
+                OnError(e);
                 //LogManager.LogHelper.Instance.Error("StartClient error", e);
 
                 return false;
@@ -372,7 +383,6 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
 
         private static byte[] ReceivingNext(Socket s)
         {
-            int readLen = 0, timeout = 0, count = 0;
             byte[] buff4 = new byte[4];
             s.Receive(buff4, 0, 4, SocketFlags.None);
 
@@ -382,8 +392,8 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
 
 
             //MemoryStream ms = new MemoryStream();
-            readLen = 0;
-            timeout = 0;
+            int readLen = 0;
+            int timeout = 0;
 
             dataLen -= 4;
             if (dataLen <= 0 || dataLen > MAXBUFFERLEN)
@@ -399,7 +409,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
 
             while (readLen < dataLen)
             {
-                count = s.Receive(buffer, readLen, dataLen - readLen, SocketFlags.None);
+                int count = s.Receive(buffer, readLen, dataLen - readLen, SocketFlags.None);
 
                 if (count == 0)
                 {
@@ -415,11 +425,13 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             var calcrc32 = HashEncrypt.GetCRC32(buffer, 0);
             if (calcrc32 != crc32)
             {
-                Exception ex = new Exception("检查校验码出错");
-                ex.Data.Add("crc32", crc32);
-                ex.Data.Add("calcrc32", calcrc32);
-                ex.Data.Add("data", Convert.ToBase64String(buffer));
+                //Exception ex = new Exception("检查校验码出错");
+                //ex.Data.Add("crc32", crc32);
+                //ex.Data.Add("calcrc32", calcrc32);
+                //ex.Data.Add("data", Convert.ToBase64String(buffer));
                 //LogManager.LogHelper.Instance.Error("接收数据错误", ex);
+
+                throw new SocketApplicationException("检查校验码出错");
             }
 
             //if (SocketApplicationEnvironment.TraceSocketDataBag)
@@ -432,12 +444,24 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
 
         private void Receiving()
         {
+            var maxIdelMills = 180 * 1000;
+            var idelSleep = 100;
+            var idelMills = 0;
             while (!stop/* && socketClient.Connected*/)
             {
                 try
                 {
-                    var buffer = ReceivingNext(socketClient);
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(ProcessMessage), buffer);
+                    if (isStartClient || idelMills >= maxIdelMills)
+                    {
+                        idelMills = 0;
+                        var buffer = ReceivingNext(socketClient);
+                        ThreadPool.QueueUserWorkItem(new WaitCallback(ProcessMessage), buffer);
+                    }
+                    else if (idelMills < maxIdelMills)
+                    {
+                        Thread.Sleep(idelSleep);
+                        idelMills += idelSleep;
+                    }
                 }
                 catch (SocketApplicationException e)
                 {
@@ -514,7 +538,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             }
             catch (Exception e)
             {
-
+                OnError(e);
             }
         }
 
@@ -532,7 +556,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             }
             catch (Exception e)
             {
-
+                OnError(e);
             }
         }
 
@@ -546,7 +570,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             catch (Exception e)
             {
                 OnError(e);
-                throw e;
+                throw;
             }
         }
 
@@ -563,7 +587,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             if (socketClient != null && errorResume && !socketClient.Connected)
             {
                 e.Data.Add("checksocket", "需要发起重连");
-                Task.Run(() => StartClient());
+                Task.Run(StartClient);
             }
             else
             {
@@ -578,6 +602,20 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             }
         }
 
+        protected virtual void OnInfo(string info)
+        {
+            Info?.Invoke(info);
+        }
+
+        protected virtual void OnDebug(string debug)
+        {
+            Debug?.Invoke(debug);
+        }
+
+        protected virtual void OnWarn(string warn)
+        {
+            Warn?.Invoke(warn);
+        }
         #region server
 
         private void Listening()
@@ -598,7 +636,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             }
             socketServer.Shutdown(SocketShutdown.Both);
             socketServer.Close();
-            SocketApplicationComm.Debug("关闭服务器套接字!");
+            OnDebug("关闭服务器套接字!");
         }
 
         private void OnSocket(object obj)
@@ -630,23 +668,23 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                 }
                 catch (SessionAbortException exp)
                 {
-                    SocketApplicationComm.Debug(exp.Message);
+                    OnDebug(exp.Message);
                     break;
                 }
                 catch (SocketException exp)
                 {
-                    SocketApplicationComm.Debug(exp.Message);
+                    OnDebug(exp.Message);
                     break;
                 }
                 catch (Exception exp)
                 {
-                    SocketApplicationComm.Debug(exp.Message);
+                    OnDebug(exp.Message);
                     OnError(exp);
                 }
             }
             socket.Shutdown(SocketShutdown.Both);
             socket.Close();
-            SocketApplicationComm.Debug(string.Format("服务器关闭套接字：{0}", appSocket.SessionID));
+            OnDebug(string.Format("服务器关闭套接字：{0}", appSocket.SessionID));
         }
 
         protected virtual void FormApp(Message message, Session session)
@@ -686,11 +724,6 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                 {
                     udpMCClient.DropMulticastGroup(SocketApplicationComm.MCAST_ADDR);
                     udpMCClient.Close();
-                }
-
-                if (listeningThread != null)
-                {
-                    listeningThread.Abort();
                 }
 
                 stop = true;

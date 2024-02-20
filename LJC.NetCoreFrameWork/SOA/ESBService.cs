@@ -300,15 +300,18 @@ namespace LJC.NetCoreFrameWork.SOA
                     if (RegisterService())
                     {
                         //LogHelper.Instance.Info("注册服务成功");
+                        OnInfo("注册服务成功");
                         break;
                     }
                     else
                     {
                         //LogHelper.Instance.Info("注册服务失败");
+                        OnWarn("注册服务失败");
                     }
                 }
                 catch (Exception ex)
                 {
+                    OnError(ex);
                     //LogHelper.Instance.Error("注册服务失败", ex);
                 }
                 Thread.Sleep(3000);
