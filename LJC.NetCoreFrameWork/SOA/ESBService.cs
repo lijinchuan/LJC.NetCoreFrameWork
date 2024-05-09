@@ -38,7 +38,7 @@ namespace LJC.NetCoreFrameWork.SOA
 
         public ESBService(string serverIP, int serverPort, int sNo, bool supportTcpServiceRedirect = false, bool supportUdpServiceRedirect = false,
             string serviceName = null, string endPointName = null)
-            : base(serverIP, serverPort, false)
+            : base(serverIP, serverPort, false, false)
         {
             this.ServiceNo = sNo;
             this.BeferLogout += this.UnRegisterService;

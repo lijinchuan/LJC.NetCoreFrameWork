@@ -38,6 +38,15 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
         private Thread listeningThread = null;
 
         /// <summary>
+        /// 连接状态
+        /// </summary>
+        public bool IsConnected
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// 是否采用安全连接
         /// </summary>
         protected bool isSecurity = false;
@@ -123,6 +132,11 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                 }
             }
         }
+
+        /// <summary>
+        /// 连接状态变化事件
+        /// </summary>
+        public event Action<bool> OnConnectedStateChanged;
 
         /// <summary>
         /// 广播
@@ -298,6 +312,11 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                 }
 
                 isStartClient = true;
+                if (!IsConnected)
+                {
+                    IsConnected = true;
+                    OnConnectedStateChanged?.Invoke(true);
+                }
                 OnDebug("客户端连接成功");
 
                 if (isResetClient && OnClientReset != null)
@@ -586,6 +605,12 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
 
             if (socketClient != null && errorResume && !socketClient.Connected)
             {
+                if (IsConnected)
+                {
+                    IsConnected = false;
+                    OnConnectedStateChanged?.Invoke(false);
+                }
+
                 e.Data.Add("checksocket", "需要发起重连");
                 Task.Run(StartClient);
             }
