@@ -203,7 +203,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
         {
             try
             {
-                if (!isStartClient && !StartClient())
+                if (!isStartClient && !StartClient().Result)
                     return false;
 
                 return true;

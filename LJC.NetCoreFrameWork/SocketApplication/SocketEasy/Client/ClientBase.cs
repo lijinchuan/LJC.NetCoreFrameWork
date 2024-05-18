@@ -233,7 +233,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasy.Client
             catch (Exception e)
             {
                 OnError(e);
-                throw e;
+                throw;
             }
         }
 

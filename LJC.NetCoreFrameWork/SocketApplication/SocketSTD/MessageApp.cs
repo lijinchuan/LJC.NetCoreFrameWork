@@ -60,7 +60,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
         /// <summary>
         /// 是否正在启动客户端
         /// </summary>
-        private bool _isStartingClient = false;
+        private volatile bool _isStartingClient = false;
 
         public event Action OnClientReset;
 
@@ -228,7 +228,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             }
         }
 
-        public bool StartClient()
+        public async ValueTask<bool> StartClient()
         {
             if (_isStartingClient)
             {
@@ -236,10 +236,14 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
             }
             _isStartingClient = true;
 
+            ProcessTraceUtil.StartTrace();
             try
             {
+                
                 if (socketClient != null && socketClient.Connected)
                     return true;
+
+                ProcessTraceUtil.Trace(socketClient?.Handle + " handle,StartClient...");
 
                 bool isResetClient = false;
                 if (socketClient != null)
@@ -247,13 +251,16 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                     try
                     {
                         socketClient.Shutdown(SocketShutdown.Both);
+                        ProcessTraceUtil.Trace("Shutdown...");
                     }
                     catch
                     {
-
+                        ProcessTraceUtil.Trace("Shutdown error...");
                     }
                     socketClient.Close();
                     isResetClient = true;
+
+                    ProcessTraceUtil.Trace("Close...");
                 }
 
                 if (!string.IsNullOrWhiteSpace(encryKey))
@@ -268,10 +275,18 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
 
                 try
                 {
+                    var cancelToken = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                     if (!string.IsNullOrEmpty(ipString))
-                        socketClient.Connect(IPAddress.Parse(ipString), ipPort);
+                       await socketClient.ConnectAsync(IPAddress.Parse(ipString), ipPort, cancelToken.Token).ConfigureAwait(false);
                     else
-                        socketClient.Connect(IPAddress.Any, ipPort);
+                       await socketClient.ConnectAsync(IPAddress.Any, ipPort,cancelToken.Token).ConfigureAwait(false);
+
+                    if (cancelToken.Token.IsCancellationRequested)
+                    {
+                        throw new SocketException((int)SocketError.TimedOut);
+                    }
+
+                    ProcessTraceUtil.Trace($"StartClient：Connect {ipString} success...");
 
                     if (isSecurity)
                     {
@@ -295,6 +310,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                 }
                 catch (SocketException e)
                 {
+                    ProcessTraceUtil.Trace(e.Message);
                     var ne = new Exception(string.Format("连接到远程服务器{0}失败，端口:{1}，原因:{2},网络错误号:{3}",
                         ipString, ipPort, e.Message, e.SocketErrorCode));
                     throw ne;
@@ -302,6 +318,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                 }
                 catch
                 {
+                    ProcessTraceUtil.Trace("throw ...");
                     throw;
                 }
 
@@ -309,6 +326,8 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                 {
                     listeningThread = new Thread(Receiving);
                     listeningThread.Start();
+
+                    ProcessTraceUtil.Trace("start Receiving ...");
                 }
 
                 isStartClient = true;
@@ -317,10 +336,11 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                     IsConnected = true;
                     OnConnectedStateChanged?.Invoke(true);
                 }
-                OnDebug("客户端连接成功");
+                ProcessTraceUtil.Trace("客户端连接成功");
 
                 if (isResetClient && OnClientReset != null)
                 {
+                    ProcessTraceUtil.Trace("OnClientReset");
                     OnClientReset();
                 }
 
@@ -331,11 +351,15 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                 OnError(e);
                 //LogManager.LogHelper.Instance.Error("StartClient error", e);
 
+                ProcessTraceUtil.Trace("StartClient error:" + e.ToString());
+
                 return false;
             }
             finally
             {
                 _isStartingClient = false;
+
+                OnDebug(ProcessTraceUtil.PrintTrace());
             }
         }
 
@@ -612,7 +636,10 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
                 }
 
                 e.Data.Add("checksocket", "需要发起重连");
-                Task.Run(StartClient);
+                if (!_isStartingClient)
+                {
+                    StartClient().ConfigureAwait(false);
+                }
             }
             else
             {

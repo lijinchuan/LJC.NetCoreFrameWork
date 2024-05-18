@@ -95,7 +95,7 @@ namespace LJC.NetCoreFrameWork.SOA
         /// </summary>
         public void StartService()
         {
-            while (!StartClient())
+            while (!StartClient().Result)
             {
                 Thread.Sleep(1000);
             }

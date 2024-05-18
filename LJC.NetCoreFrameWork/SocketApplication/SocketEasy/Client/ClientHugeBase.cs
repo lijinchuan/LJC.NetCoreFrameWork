@@ -191,7 +191,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasy.Client
                     catch (Exception e)
                     {
                         lastReStartClientTime = DateTime.Now;
-                        throw e;
+                        throw;
                     }
 
                     isStartClient = true;
@@ -388,7 +388,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketEasy.Client
             catch (Exception e)
             {
                 OnError(e);
-                throw e;
+                throw;
             }
         }
 
