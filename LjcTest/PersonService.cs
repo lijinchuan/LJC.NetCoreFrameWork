@@ -11,7 +11,7 @@ namespace LjcTest
 
         }
 
-        public override object DoResponse(int funcId, byte[] Param, string clientid)
+        public override object DoResponse(int funcId, byte[] Param, string clientid,Dictionary<string,string> header)
         {
             switch (funcId)
             {

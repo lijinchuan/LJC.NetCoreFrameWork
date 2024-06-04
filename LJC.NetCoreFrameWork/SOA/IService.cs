@@ -8,7 +8,7 @@ namespace LJC.NetCoreFrameWork.SOA
     {
         bool RegisterService();
 
-        object DoResponse(int funcId, byte[] request, string clientid);
+        object DoResponse(int funcId, byte[] request, string clientid,Dictionary<string,string> header);
 
     }
 }

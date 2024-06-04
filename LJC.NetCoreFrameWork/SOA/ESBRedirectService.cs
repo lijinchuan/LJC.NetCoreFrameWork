@@ -4,13 +4,14 @@ using LJC.NetCoreFrameWork.SocketApplication;
 using LJC.NetCoreFrameWork.SocketApplication.SocketEasy.Sever;
 using System;
 using System.Collections.Generic;
+using System.Reflection.PortableExecutable;
 using System.Text;
 
 namespace LJC.NetCoreFrameWork.SOA
 {
     public class ESBRedirectService : SessionServer
     {
-        public Func<int, byte[], string, object> DoResponseAction;
+        public Func<int, byte[], string, Dictionary<string, string>, object> DoResponseAction;
 
         private int _serviceNo;
 
@@ -56,7 +57,7 @@ namespace LJC.NetCoreFrameWork.SOA
                     }
                     if (DoResponseAction != null)
                     {
-                        var obj = DoResponseAction(reqbag.FuncId, reqbag.Param, session.SessionID);
+                        var obj = DoResponseAction(reqbag.FuncId, reqbag.Param, session.SessionID, message.MessageHeader.CustomData);
 
                         if (!string.IsNullOrWhiteSpace(message.MessageHeader.TransactionID))
                         {

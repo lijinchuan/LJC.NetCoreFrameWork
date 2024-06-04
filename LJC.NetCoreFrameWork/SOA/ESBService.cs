@@ -6,6 +6,7 @@ using System.Text;
 using System.Linq;
 using System.Threading;
 using LJC.NetCoreFrameWork.SOA.Contract;
+using LJC.NetCoreFrameWork.EntityBuf;
 
 namespace LJC.NetCoreFrameWork.SOA
 {
@@ -108,6 +109,28 @@ namespace LJC.NetCoreFrameWork.SOA
             private set;
         }
 
+        protected T GetParam<T>(Dictionary<string, string> messageHeader, byte[] data)
+        {
+            var isJson = messageHeader?[Consts.HeaderKey_ContentType] == Consts.HeaderValue_ContentType_JSONValue;
+            if (isJson)
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(data));
+            }
+
+            return EntityBufCore.DeSerialize<T>(data);
+        }
+
+        protected byte[] BuildResult(Dictionary<string, string> messageHeader, object result)
+        {
+            var isJson = messageHeader?[Consts.HeaderKey_ContentType] == Consts.HeaderValue_ContentType_JSONValue;
+            if (isJson)
+            {
+                return Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(result));
+            }
+
+            return EntityBufCore.Serialize(result);
+        }
+
         protected sealed override void ReciveMessage(Message message)
         {
             if (message.IsMessage((int)SOAMessageType.QueryServiceNo))
@@ -141,8 +164,8 @@ namespace LJC.NetCoreFrameWork.SOA
 
                     try
                     {
-                        var result = DoResponse(request.FundId, request.Param, request.ClientId);
-                        responseBody.Result = EntityBuf.EntityBufCore.Serialize(result);
+                        var result = DoResponse(request.FundId, request.Param, request.ClientId,message.MessageHeader.CustomData);
+                        responseBody.Result = BuildResult(message.MessageHeader.CustomData, result);
                         responseBody.IsSuccess = true;
 
                         //if (SocketApplicationEnvironment.TraceMessage)
@@ -194,7 +217,7 @@ namespace LJC.NetCoreFrameWork.SOA
             return base.DoMessage(message);
         }
 
-        public virtual object DoResponse(int funcId, byte[] Param, string clientid)
+        public virtual object DoResponse(int funcId, byte[] Param, string clientid, Dictionary<string, string> header)
         {
             return null;
         }

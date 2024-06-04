@@ -1,4 +1,5 @@
-﻿using LJC.NetCoreFrameWork.SOA.Contract;
+﻿using LJC.NetCoreFrameWork.EntityBuf;
+using LJC.NetCoreFrameWork.SOA.Contract;
 using LJC.NetCoreFrameWork.SocketApplication;
 using LJC.NetCoreFrameWork.SocketApplication.SocketEasyUDP.Sever;
 using System;
@@ -9,7 +10,7 @@ namespace LJC.NetCoreFrameWork.SOA
 {
     public class ESBUDPService : SessionServer
     {
-        public Func<int, byte[], string, object> DoResponseAction;
+        public Func<int, byte[], string,Dictionary<string,string>, object> DoResponseAction;
 
         private int _serviceNo;
         public ESBUDPService(int serviceNo, string[] ips, int port) : base(ips, port)
@@ -26,6 +27,28 @@ namespace LJC.NetCoreFrameWork.SOA
         public int GetBindUdpPort()
         {
             return this._bindport;
+        }
+
+        protected T GetParam<T>(Dictionary<string, string> messageHeader, byte[] data)
+        {
+            var isJson = messageHeader?[Consts.HeaderKey_ContentType] == Consts.HeaderValue_ContentType_JSONValue;
+            if (isJson)
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(data));
+            }
+
+            return EntityBufCore.DeSerialize<T>(data);
+        }
+
+        protected byte[] BuildResult(Dictionary<string, string> messageHeader, object result)
+        {
+            var isJson = messageHeader?[Consts.HeaderKey_ContentType] == Consts.HeaderValue_ContentType_JSONValue;
+            if (isJson)
+            {
+                return Encoding.UTF8.GetBytes(Newtonsoft.Json.JsonConvert.SerializeObject(result));
+            }
+
+            return EntityBufCore.Serialize(result);
         }
 
         protected override void FromSessionMessage(Message message, UDPSession session)
@@ -46,7 +69,7 @@ namespace LJC.NetCoreFrameWork.SOA
             {
                 try
                 {
-                    var reqbag = EntityBuf.EntityBufCore.DeSerialize<SOARedirectRequest>(message.MessageBuffer);
+                    var reqbag = GetParam<SOARedirectRequest>(message.MessageHeader.CustomData, message.MessageBuffer);
 
                     if (reqbag.ServiceNo != _serviceNo)
                     {
@@ -54,7 +77,7 @@ namespace LJC.NetCoreFrameWork.SOA
                     }
                     if (DoResponseAction != null)
                     {
-                        var obj = DoResponseAction(reqbag.FuncId, reqbag.Param, session.SessionID);
+                        var obj = DoResponseAction(reqbag.FuncId, reqbag.Param, session.SessionID, message.MessageHeader.CustomData);
 
                         if (!string.IsNullOrWhiteSpace(message.MessageHeader.TransactionID))
                         {
@@ -63,7 +86,7 @@ namespace LJC.NetCoreFrameWork.SOA
                             SOARedirectResponse resp = new SOARedirectResponse();
                             resp.IsSuccess = true;
                             resp.ResponseTime = DateTime.Now;
-                            resp.Result = EntityBuf.EntityBufCore.Serialize(obj);
+                            resp.Result = BuildResult(message.MessageHeader.CustomData, obj);
                             retmsg.SetMessageBody(resp);
 
                             session.SendMessage(retmsg);

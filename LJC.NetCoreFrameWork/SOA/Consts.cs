@@ -12,6 +12,8 @@ namespace LJC.NetCoreFrameWork.SOA
         public const int FunNo_ExistsAServiceNo = 3;
         public const int FunNo_GetRegisterServiceInfo = 4;
 
+        public const string HeaderKey_ContentType = "contentType";
+        public const string HeaderValue_ContentType_JSONValue = "application/json";
 
         public const string ERRORSERVICEMSG = "请求的服务号错误";
         public const string MISSINGFUNCTION = "服务未实现";
