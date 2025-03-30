@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using LJC.NetCoreFrameWork.SOA.Contract;
 using LJC.NetCoreFrameWork.EntityBuf;
+using System.Net.Sockets;
 
 namespace LJC.NetCoreFrameWork.SOA
 {
@@ -69,25 +70,35 @@ namespace LJC.NetCoreFrameWork.SOA
 
         void ESBService_OnClientReset()
         {
-            while (true)
+            for (var i = 0; i < 10; i++)
             {
                 try
                 {
                     if (RegisterService())
                     {
-                        //LogHelper.Instance.Info("连接重置后注册服务成功");
+                        OnDebug("连接重置后注册服务成功");
                         break;
                     }
                     else
                     {
+                        OnDebug("连接重置后注册服务失败，接口返回失败");
                         //LogHelper.Instance.Info("连接重置后注册服务失败");
                     }
                 }
+                catch(SocketException ex)
+                {
+                    OnWarn("连接重置后注册服务失败:" + ex.ToString());
+                    throw;
+                }
                 catch (Exception ex)
                 {
-                    //LogHelper.Instance.Error("连接重置后注册服务失败", ex);
+                    OnWarn("连接重置后注册服务失败:" + ex.ToString());
                 }
-                Thread.Sleep(3000);
+
+                if (i < 10)
+                {
+                    Thread.Sleep(3000);
+                }
             }
         }
 
@@ -316,28 +327,36 @@ namespace LJC.NetCoreFrameWork.SOA
         protected override void OnLoginSuccess()
         {
             base.OnLoginSuccess();
-            while (true)
+            for (var i = 0; i < 10; i++)
             {
                 try
                 {
                     if (RegisterService())
                     {
                         //LogHelper.Instance.Info("注册服务成功");
-                        OnInfo("注册服务成功");
+                        OnInfo("登录成功后注册服务成功");
                         break;
                     }
                     else
                     {
                         //LogHelper.Instance.Info("注册服务失败");
-                        OnWarn("注册服务失败");
+                        OnWarn("登录成功后注册服务失败");
                     }
+                }
+                catch (SocketException ex)
+                {
+                    OnWarn("登录成功后注册服务失败:" + ex.ToString());
+                    throw;
                 }
                 catch (Exception ex)
                 {
-                    OnError(ex);
+                    OnWarn("登录成功后注册服务失败:" + ex.ToString());
                     //LogHelper.Instance.Error("注册服务失败", ex);
                 }
-                Thread.Sleep(3000);
+                if (i < 10)
+                {
+                    Thread.Sleep(3000);
+                }
             }
         }
 
@@ -350,23 +369,28 @@ namespace LJC.NetCoreFrameWork.SOA
         {
             base.OnSessionResume();
 
-            while (true)
+            for (var i = 0; i < 10; i++)
             {
                 try
                 {
                     if (RegisterService())
                     {
-                        //LogHelper.Instance.Info("连接恢复后注册服务成功");
+                        OnDebug("连接恢复后注册服务成功");
                         break;
                     }
                     else
                     {
-                        //LogHelper.Instance.Info("连接恢复后注册服务失败");
+                        OnWarn("连接恢复后注册服务失败，接口返回失败");
                     }
+                }
+                catch (SocketException ex)
+                {
+                    OnWarn("连接恢复后注册服务失败:" + ex.Message);
+                    throw;
                 }
                 catch (Exception ex)
                 {
-                    //LogHelper.Instance.Error("连接恢复后注册服务失败", ex);
+                    OnWarn("连接恢复后注册服务失败:"+ex.Message);
                 }
 
                 Thread.Sleep(3000);

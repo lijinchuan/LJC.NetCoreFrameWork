@@ -180,7 +180,7 @@ namespace LJC.NetCoreFrameWork.SocketApplication
             catch (Exception ex)
             {
                 ex.Data.Add("TransactionID", message.MessageHeader.TransactionID);
-                throw new SocketApplicationException("SendMessage fail", ex);
+                throw new SocketApplicationException("SendMessage fail:" + message.MessageHeader.MessageType, ex);
             }
         }
 
