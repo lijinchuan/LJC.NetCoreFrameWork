@@ -45,52 +45,59 @@ namespace LJC.NetCoreFrameWork.SocketApplication.SocketSTD
 
             using (AutoReSetEventResult autoResetEvent = new AutoReSetEventResult(reqID))
             {
-                watingEvents.TryAdd(reqID, autoResetEvent);
-                BuzException = null;
-                SendMessage(message);
-                //new Func<Message, bool>(SendMessage).BeginInvoke(message, null, null);
-                WaitHandle.WaitAny(new WaitHandle[] { autoResetEvent }, timeOut);
-                AutoReSetEventResult removedicitem = null;
-                watingEvents.TryRemove(reqID, out removedicitem);
+                try
+                {
+                    watingEvents.TryAdd(reqID, autoResetEvent);
+                    BuzException = null;
+                    SendMessage(message);
+                    //new Func<Message, bool>(SendMessage).BeginInvoke(message, null, null);
+                    WaitHandle.WaitAny(new WaitHandle[] { autoResetEvent }, timeOut);
+                    AutoReSetEventResult removedicitem = null;
+                    watingEvents.TryRemove(reqID, out removedicitem);
 
-                if (BuzException != null)
-                {
-                    throw BuzException;
-                }
+                    if (BuzException != null)
+                    {
+                        throw BuzException;
+                    }
 
-                if (autoResetEvent.IsTimeOut)
-                {
-                    var ex = new TimeoutException();
-                    ex.Data.Add("errorsender", "LJC.FrameWork.SocketApplication.SocketSTD.SessionClient");
-                    ex.Data.Add("MessageType", message.MessageHeader.MessageType);
-                    ex.Data.Add("TransactionID", message.MessageHeader.TransactionID);
-                    ex.Data.Add("ipString", this.ipString);
-                    ex.Data.Add("ipPort", this.ipPort);
-                    if (message.MessageBuffer != null)
+                    if (autoResetEvent.IsTimeOut)
                     {
-                        ex.Data.Add("MessageBuffer", Convert.ToBase64String(message.MessageBuffer));
+                        var ex = new TimeoutException();
+                        ex.Data.Add("errorsender", "LJC.FrameWork.SocketApplication.SocketSTD.SessionClient");
+                        ex.Data.Add("MessageType", message.MessageHeader.MessageType);
+                        ex.Data.Add("TransactionID", message.MessageHeader.TransactionID);
+                        ex.Data.Add("ipString", this.ipString);
+                        ex.Data.Add("ipPort", this.ipPort);
+                        if (message.MessageBuffer != null)
+                        {
+                            ex.Data.Add("MessageBuffer", Convert.ToBase64String(message.MessageBuffer));
+                        }
+                        ex.Data.Add("resulttype", typeof(T).FullName);
+                        //LogManager.LogHelper.Instance.Error("SendMessageAnsy", ex);
+                        throw ex;
                     }
-                    ex.Data.Add("resulttype", typeof(T).FullName);
-                    //LogManager.LogHelper.Instance.Error("SendMessageAnsy", ex);
-                    throw ex;
+                    else
+                    {
+                        if (autoResetEvent.DataException != null)
+                        {
+                            throw autoResetEvent.DataException;
+                        }
+                        try
+                        {
+                            T result = EntityBufCore.DeSerialize<T>((byte[])autoResetEvent.WaitResult);
+                            return result;
+                        }
+                        catch (Exception ex)
+                        {
+                            Exception e = new Exception("解析消息体失败：" + reqID, ex);
+                            e.Data.Add("messageid", reqID);
+                            throw e;
+                        }
+                    }
                 }
-                else
+                finally
                 {
-                    if (autoResetEvent.DataException != null)
-                    {
-                        throw autoResetEvent.DataException;
-                    }
-                    try
-                    {
-                        T result = EntityBufCore.DeSerialize<T>((byte[])autoResetEvent.WaitResult);
-                        return result;
-                    }
-                    catch (Exception ex)
-                    {
-                        Exception e = new Exception("解析消息体失败：" + reqID, ex);
-                        e.Data.Add("messageid", reqID);
-                        throw e;
-                    }
+                    watingEvents.TryRemove(reqID, out _);
                 }
             }
         }
